@@ -1,0 +1,11 @@
+[package]
+name = "kuba1001t"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+name = "playground_bot"
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+pyo3 = { version = "0.18.0", features = ["extension-module"] }
