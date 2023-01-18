@@ -16,7 +16,7 @@ with open(path) as f:
 tokenio = config.get('tokenio')
 prefix = "!"
 mastodon = Mastodon(
-    access_token = 'dMfU4LY9-2tUSRIRYvU3g71tQbJJvIeBQlfUtNoKVKE',
+    access_token = config.get('masto'),
     api_base_url = 'https://101010.pl'
 )
 #intents = discord.Intents.default()
@@ -115,7 +115,7 @@ async def atomcheck(ctx, query: discord.Option(str)):
             except:
                 await ctx.respond(f"{acct} has activated the Atomic Bomb :boom: ")
     except:
-        await ctx.respond(f"ZNOWU?")
+        await ctx.respond(f"Command failed")
 
 @k3x10.command(description="checks rate limit")
 async def ratelimitcheck(ctx):
