@@ -5,6 +5,7 @@ import os
 import json
 import random
 import requests
+import robloxpy
 from mastodon import Mastodon
 from io import BytesIO
 from pathlib import Path
@@ -13,6 +14,7 @@ path = Path(__file__).with_name("config.json")
 with open(path) as f:
 	config = json.load(f)
 
+robloxpy.User.Internal.SetCookie(config.get("roblo"),True)
 tokenio = config.get('tokenio')
 prefix = "!"
 mastodon = Mastodon(
@@ -26,6 +28,7 @@ client = discord.Bot()
 
 k3x10 = discord.SlashCommandGroup("3x10", "Commands for 101010.pl users")
 mod = discord.SlashCommandGroup("mod", "Moderator commands")
+roblox = discord.SlashCommandGroup("roblox", "Roblox commands")
 
 @client.event
 async def on_ready():
@@ -102,6 +105,27 @@ async def kick(ctx, *, member : discord.Member, reason = "no provided reason"):
     await member.kick(reason=reason)
     await ctx.respond(f'Kicked {member} for {reason}')
 
+@roblox.command(description="Get game details")
+async def getgame(ctx, universeid : discord.Option(int)):
+#    currentplayers = robloxpy.Game.Internal.GetCurrentPlayers(query)
+#    visits = robloxpy.Game.Internal.GetGameVisits(query)
+#    likes = robloxpy.Game.Internal.GetGameLikes(query)
+#    dislikes = robloxpy.Game.Internal.GetGameDislikes(query)
+#    universeid = robloxpy.Game.Internal.GetUniverseID(query)
+    #robloxpy.Game.External.GetUniverseData(query)
+    #query = robloxpy.Game.Internal.GetUniverseID(query)
+    unidata = robloxpy.Game.External.GetUniverseData(universeid)
+    #print(unidata)
+    name = unidata.get("name")
+    placeid = unidata.get("rootPlaceId")
+    currentplayers = unidata.get('playing')
+    visits = unidata.get('visits')
+    #likes = robloxpy.Game.Internal.GetGameLikes(placeid)
+    #dislikes = robloxpy.Game.Internal.GetGameDislikes(placeid)
+    favorites = unidata.get("favouritedCount")
+    #name = robloxpy.Game.Internal.MyGame.name
+    await ctx.send("Game name: " + name + "\nFavourites: " + str(favorites) + "\nCurrent Players: " + str(currentplayers) + "\nVisits: " + str(visits))
+
 @k3x10.command(description="Search for a Mastodon user")
 async def search(ctx, query: discord.Option(str)):
     userlist = mastodon.account_search(query, limit = None, following = False)
@@ -176,4 +200,5 @@ async def atomlist(ctx):
     await ctx.respond(messagecontent)
 client.add_application_command(k3x10)
 client.add_application_command(mod)
+client.add_application_command(roblox)
 client.run(tokenio)
