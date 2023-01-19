@@ -24,7 +24,8 @@ mastodon = Mastodon(
 req = requests.Session()
 client = discord.Bot()
 
-k3x10 = discord.SlashCommandGroup("3x10", "Komendy dla użyszkodników głównie 101010.pl.")
+k3x10 = discord.SlashCommandGroup("3x10", "Commands for 101010.pl users")
+mod = discord.SlashCommandGroup("mod", "Moderator commands")
 
 @client.event
 async def on_ready():
@@ -77,7 +78,7 @@ async def status_changer():
 
 
 
-@client.command(description="Nukes channel")
+@mod.command(description="Nukes channel")
 @commands.has_permissions(administrator = True)
 async def nuke(ctx, channel_name):
     guild = client.guilds[0]
@@ -87,6 +88,19 @@ async def nuke(ctx, channel_name):
         await existing_channel.delete()
     else:
         await ctx.respond(f'No channel named **{channel_name}** was found')
+
+@mod.command(description="Bans user")
+@commands.has_permissions(administrator = True)
+async def ban(ctx, *, member : discord.Member, reason = "no provided reason"):
+#async def ban(ctx, *, member: discord.Option(str), reason: discord.Option(str)):
+    await member.ban(reason=reason)
+    await ctx.respond(f'Banned {member} for {reason}')
+
+@mod.command(description="Kicks user")
+@commands.has_permissions(administrator = True)
+async def kick(ctx, *, member : discord.Member, reason = "no provided reason"):
+    await member.kick(reason=reason)
+    await ctx.respond(f'Kicked {member} for {reason}')
 
 @k3x10.command(description="Search for a Mastodon user")
 async def search(ctx, query: discord.Option(str)):
@@ -161,5 +175,5 @@ async def atomlist(ctx):
                     messagecontent += "Clear :white_check_mark: - lewacki.space\n"
     await ctx.respond(messagecontent)
 client.add_application_command(k3x10)
-
+client.add_application_command(mod)
 client.run(tokenio)
