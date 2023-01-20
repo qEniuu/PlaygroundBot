@@ -79,19 +79,6 @@ async def status_changer():
                 await client.change_presence(status=discord.Status.online, activity=discord.Activity(name=random.choice(statuslistenlist), type=discord.ActivityType.listening))
                 await asyncio.sleep(15)
 
-
-
-@mod.command(description="Nukes channel")
-@commands.has_permissions(administrator = True)
-async def nuke(ctx, channel_name):
-    guild = client.guilds[0]
-    existing_channel = discord.utils.get(guild.channels, name=channel_name)
-    if existing_channel is not None:
-        await existing_channel.clone(reason="Has been nuked")
-        await existing_channel.delete()
-    else:
-        await ctx.respond(f'No channel named **{channel_name}** was found')
-
 @mod.command(description="Bans user")
 @commands.has_permissions(administrator = True)
 async def ban(ctx, *, member : discord.Member, reason = "no provided reason"):
@@ -105,6 +92,17 @@ async def kick(ctx, *, member : discord.Member, reason = "no provided reason"):
     await member.kick(reason=reason)
     await ctx.respond(f'Kicked {member} for {reason}')
 
+@mod.command(description="Nukes channel")
+@commands.has_permissions(administrator = True)
+async def nuke(ctx, channel_name):
+    guild = client.guilds[0]
+    existing_channel = discord.utils.get(guild.channels, name=channel_name)
+    if existing_channel is not None:
+        await existing_channel.clone(reason="Has been nuked")
+        await existing_channel.delete()
+    else:
+        await ctx.respond(f'No channel named **{channel_name}** was found')
+
 @roblox.command(description="Get game details")
 async def getgame(ctx, universeid : discord.Option(int)):
 #    currentplayers = robloxpy.Game.Internal.GetCurrentPlayers(query)
@@ -114,27 +112,31 @@ async def getgame(ctx, universeid : discord.Option(int)):
 #    universeid = robloxpy.Game.Internal.GetUniverseID(query)
     #robloxpy.Game.External.GetUniverseData(query)
     #query = robloxpy.Game.Internal.GetUniverseID(query)
+    await ctx.respond("Sending request")
     unidata = robloxpy.Game.External.GetUniverseData(universeid)
-    #print(unidata)
+    print(unidata)
     name = unidata.get("name")
     placeid = unidata.get("rootPlaceId")
     currentplayers = unidata.get('playing')
     visits = unidata.get('visits')
+    createdat = unidata.get("created")
+    maxplayers = unidata.get("maxPlayers")
     #likes = robloxpy.Game.Internal.GetGameLikes(placeid)
     #dislikes = robloxpy.Game.Internal.GetGameDislikes(placeid)
     favorites = unidata.get("favouritedCount")
     #name = robloxpy.Game.Internal.MyGame.name
-    await ctx.send("Game name: " + name + "\nFavourites: " + str(favorites) + "\nCurrent Players: " + str(currentplayers) + "\nVisits: " + str(visits))
+    await ctx.send("Game name: " + name + "\nUniverse ID: " + str(universeid) + "\nRoot Place ID: " + str(placeid) + "\nCreated at: " + createdat + "\nFavourites: " + str(favorites) + "\nCurrent Players: " + str(currentplayers) + "\nVisits: " + str(visits) + "\nMax Players: " + str(maxplayers))
 
-@k3x10.command(description="Search for a Mastodon user")
-async def search(ctx, query: discord.Option(str)):
-    userlist = mastodon.account_search(query, limit = None, following = False)
-    acct = userlist[0].get("acct")
-    displayname = userlist[0].get("display_name")
-    followers = userlist[0].get("followers_count")
-    followers = str(followers)
-    messagecontent = "Account name: " + acct + "\nDisplay name: " + displayname + "\nFollowers: " + followers
-    await ctx.respond(messagecontent)
+@roblox.command(description="Get user details")
+async def getuser(ctx, username : discord.Option(str)):
+    await ctx.respond("Sending request")
+    userid = robloxpy.User.External.GetID(username)
+    isonline = robloxpy.User.External.IsOnline(userid)
+    isbanned = robloxpy.User.External.Isbanned(userid)
+    agedays = robloxpy.User.External.GetAge(userid)
+    getrap = robloxpy.User.External.GetRAP(userid)
+    image = robloxpy.User.External.GetBust(userid)
+    await ctx.send("Username: " + username + "\nUser ID: " + str(userid) + "\nAccount age in days: " + str(agedays) + "\nIs online?: " + str(isonline) + "\nIs banned?: " + str(isbanned) + "\nRAP: " + str(getrap) + "\nBust: " + image)
 
 @k3x10.command(description="Checks atoms from users")
 async def atomcheck(ctx, query: discord.Option(str)):
@@ -154,10 +156,6 @@ async def atomcheck(ctx, query: discord.Option(str)):
                 await ctx.respond(f"{acct} has activated the Atomic Bomb :boom: ")
     except:
         await ctx.respond(f"Command failed")
-
-@k3x10.command(description="checks rate limit")
-async def ratelimitcheck(ctx):
-    await ctx.respond("Amount of avaibale: " + str(mastodon.ratelimit_remaining) + "\nReset: " + str(mastodon.ratelimit_reset) + "\nLimit: " + str(mastodon.ratelimit_limit))
 
 @k3x10.command(description="Atom List!")
 async def atomlist(ctx):
@@ -197,7 +195,21 @@ async def atomlist(ctx):
                     messagecontent += "Atom :boom: - lewacki.space\n"
                 else:
                     messagecontent += "Clear :white_check_mark: - lewacki.space\n"
+        await ctx.respond(messagecontent)
+@k3x10.command(description="checks rate limit")
+async def ratelimitcheck(ctx):
+    await ctx.respond("Amount of avaibale: " + str(mastodon.ratelimit_remaining) + "\nReset: " + str(mastodon.ratelimit_reset) + "\nLimit: " + str(mastodon.ratelimit_limit))
+
+@k3x10.command(description="Search for a Mastodon user")
+async def search(ctx, query: discord.Option(str)):
+    userlist = mastodon.account_search(query, limit = None, following = False)
+    acct = userlist[0].get("acct")
+    displayname = userlist[0].get("display_name")
+    followers = userlist[0].get("followers_count")
+    followers = str(followers)
+    messagecontent = "Account name: " + acct + "\nDisplay name: " + displayname + "\nFollowers: " + followers
     await ctx.respond(messagecontent)
+    
 client.add_application_command(k3x10)
 client.add_application_command(mod)
 client.add_application_command(roblox)
