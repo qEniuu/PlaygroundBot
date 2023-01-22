@@ -30,6 +30,10 @@ k3x10 = discord.SlashCommandGroup("3x10", "Commands for 101010.pl users")
 mod = discord.SlashCommandGroup("mod", "Moderator commands")
 roblox = discord.SlashCommandGroup("roblox", "Roblox commands")
 
+def fuf(query):
+    mastodon.account_follow(query)
+    mastodon.account_unfollow(query)
+
 @client.event
 async def on_ready():
         os.system("clear")
@@ -196,6 +200,7 @@ async def atomlist(ctx):
                 else:
                     messagecontent += "Clear :white_check_mark: - lewacki.space\n"
         await ctx.respond(messagecontent)
+	
 @k3x10.command(description="checks rate limit")
 async def ratelimitcheck(ctx):
     await ctx.respond("Amount of avaibale: " + str(mastodon.ratelimit_remaining) + "\nReset: " + str(mastodon.ratelimit_reset) + "\nLimit: " + str(mastodon.ratelimit_limit))
