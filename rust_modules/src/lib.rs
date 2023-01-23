@@ -1,12 +1,18 @@
 use pyo3::prelude::*;
 
-#[pyfunction]
-fn hello_world() -> PyResult<String> {
-    Ok(String::from("Hello World!"))
+mod brainfuck;
+
+fn brainfuck_module(py: Python<'_>, m: &PyModule) -> PyResult<()> {
+    let module = PyModule::new(py, "brainfuck")?;
+    module.add_function(wrap_pyfunction!(brainfuck::interpret, m)?)?;
+    m.add_submodule(module);
+    py.import("sys")?.getattr("modules")?.set_item("supermodule.submodule", module)?;
+    Ok(())
 }
 
 #[pymodule]
-fn playground_bot(_py: Python<'_>, m: &PyModule) -> PyResult<()> {
-    m.add_function(wrap_pyfunction!(hello_world, m)?)?;
+fn playground_bot(py: Python<'_>, m: &PyModule) -> PyResult<()> {
+    pyo3_log::init();
+    brainfuck_module(py, m);
     Ok(())
 }
